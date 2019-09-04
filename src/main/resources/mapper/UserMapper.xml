@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maven.dudu.dao.UserDao">
+    <!--  添加用户  -->
+    <insert id="addUser" parameterType="com.maven.dudu.entity.User">
+        insert into user(userid,username,userimg)
+        value (#{userid},#{username},#{userimg})
+    </insert>
+    <!--  根据用户id查询用户  -->
+    <select id="getUserById" resultType="com.maven.dudu.entity.User">
+        select * from user where userid=#{userid}
+    </select>
+    <!--  添加发布  -->
+    <insert id="addRelease" parameterType="com.maven.dudu.entity.Release">
+        insert into releasemy(ruserid,rtext,rtitle) value (#{ruserid},#{rtext},#{rtitle})
+    </insert>
+
+    <resultMap type="com.maven.dudu.entity.Release" id="release">
+        <id column="releaseid" property="releaseid" />
+        <result column="rtext" property="rtext" />
+        <result column="ruserid" property="ruserid" />
+        <result column="rtitle" property="rtitle" />
+        <result column="rlike" property="rlike" />
+        <association property="user" javaType="com.maven.dudu.entity.User" >
+            <id column="userid" property="userid" />
+            <result column="username" property="username" />
+            <result column="userimg" property="userimg" />
+        </association>
+    </resultMap>
+    <!--  显示发布  -->
+    <select id="getAllRelease" resultMap="release">
+        select * from releasemy,user where releasemy.ruserid=user.userid
+    </select>
+
+    <!-- 添加评论 -->
+    <insert id="addComment" parameterType="com.maven.dudu.entity.Comment">
+        insert into comment(userid,releaseid,commenttext) values (#{userid},#{releaseid},#{commenttext});
+    </insert>
+
+    <!--  显示评论  -->
+    <resultMap type="com.maven.dudu.entity.Comment" id="comment">
+        <id column="commentid" property="commentid" />
+        <result column="userid" property="userid" />
+        <result column="releaseid" property="releaseid" />
+        <result column="commenttext" property="commenttext" />
+        <association property="user" javaType="com.maven.dudu.entity.User" >
+            <id column="userid" property="userid" />
+            <result column="username" property="username" />
+            <result column="userimg" property="userimg" />
+        </association>
+    </resultMap>
+    <!--  显示评论  -->
+    <select id="getAllComment" resultMap="comment">
+        select * from comment,user where comment.userid=user.userid
+    </select>
+</mapper>
