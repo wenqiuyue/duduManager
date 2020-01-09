@@ -5,7 +5,8 @@ public class Release {
     private String rtext;
     private String ruserid;
     private String rtitle;
-    private Integer rlike;
+    private Integer rlikes;
+    private Integer commentnum;
     private User user;
     public Integer getReleaseid() {
         return releaseid;
@@ -39,12 +40,20 @@ public class Release {
         this.rtitle = rtitle;
     }
 
-    public Integer getRlike() {
-        return rlike;
+    public Integer getRlikes() {
+        return rlikes;
     }
 
-    public void setRlike(Integer rlike) {
-        this.rlike = rlike;
+    public void setRlikes(Integer rlike) {
+        this.rlikes = rlike;
+    }
+
+    public Integer getCommentnum() {
+        return commentnum;
+    }
+
+    public void setCommentnum(Integer commentnum) {
+        this.commentnum = commentnum;
     }
 
     public User getUser() {

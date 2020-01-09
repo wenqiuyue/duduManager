@@ -14,7 +14,7 @@
     </select>
     <!--  添加发布  -->
     <insert id="addRelease" parameterType="com.maven.dudu.entity.Release">
-        insert into releasemy(ruserid,rtext,rtitle) value (#{ruserid},#{rtext},#{rtitle})
+        insert into releasemy(ruserid,rtext,rtitle,rlikes,commentnum) value (#{ruserid},#{rtext},#{rtitle},#{rlikes},#{commentnum})
     </insert>
 
     <resultMap type="com.maven.dudu.entity.Release" id="release">
@@ -22,7 +22,8 @@
         <result column="rtext" property="rtext" />
         <result column="ruserid" property="ruserid" />
         <result column="rtitle" property="rtitle" />
-        <result column="rlike" property="rlike" />
+        <result column="rlikes" property="rlikes" />
+        <result column="commentnum" property="commentnum" />
         <association property="user" javaType="com.maven.dudu.entity.User" >
             <id column="userid" property="userid" />
             <result column="username" property="username" />
@@ -31,13 +32,24 @@
     </resultMap>
     <!--  显示发布  -->
     <select id="getAllRelease" resultMap="release">
-        select * from releasemy,user where releasemy.ruserid=user.userid
+        select * from releasemy,user where releasemy.ruserid=user.userid order by releasemy.releaseid desc
     </select>
 
     <!-- 添加评论 -->
     <insert id="addComment" parameterType="com.maven.dudu.entity.Comment">
         insert into comment(userid,releaseid,commenttext) values (#{userid},#{releaseid},#{commenttext});
     </insert>
+
+    <!--  修改评论数量  -->
+    <update id="updateCommentNum" parameterType="int">
+        update releasemy set commentnum=commentnum+1 where releaseid=#{releaseid}
+    </update>
+
+    <!--  修改喜欢数量  -->
+    <update id="updateLikeNum" parameterType="int">
+        update releasemy set rlikes=rlikes+1 where releaseid=#{releaseid}
+    </update>
+
 
     <!--  显示评论  -->
     <resultMap type="com.maven.dudu.entity.Comment" id="comment">
@@ -55,4 +67,110 @@
     <select id="getAllComment" resultMap="comment">
         select * from comment,user where comment.userid=user.userid
     </select>
+
+    <!--  关注  -->
+    <insert id="addFollow" parameterType="com.maven.dudu.entity.Follow">
+        insert into follow (uid,ruserid) value (#{uid},#{ruserid})
+    </insert>
+
+    <!--  查询是否关注  -->
+    <select id="isFollow" parameterType="com.maven.dudu.entity.Follow" resultType="int">
+        select COUNT(*) from follow where uid=#{uid} and ruserid=#{ruserid}
+    </select>
+
+    <!--  查询我的关注数量  -->
+    <select id="getFocueCount" parameterType="com.maven.dudu.entity.Follow" resultType="int">
+        select COUNT(*) from follow where uid=#{uid}
+    </select>
+
+    <!--  查询我的粉丝数量  -->
+    <select id="getFansCount" parameterType="com.maven.dudu.entity.Follow" resultType="int">
+        select COUNT(*) from follow where ruserid=#{ruserid}
+    </select>
+
+    <!--  查询作品数量  -->
+    <select id="getReleaseCount" parameterType="com.maven.dudu.entity.Release" resultType="int">
+        select COUNT(*) from releasemy where ruserid=#{ruserid}
+    </select>
+
+    <!--  查询我的关注  -->
+    <select id="getFocue" parameterType="com.maven.dudu.entity.Follow" resultType="com.maven.dudu.entity.Follow">
+        select * from follow,user where follow.uid=#{uid} and follow.ruserid=user.userid
+    </select>
+    
+    <!--  取消关注  -->
+    <delete id="delFocus" parameterType="com.maven.dudu.entity.Follow">
+        delete from follow where uid=#{uid} and ruserid=#{ruserid}
+    </delete>
+
+    <!--  查询我的粉丝  -->
+    <select id="getFans" parameterType="com.maven.dudu.entity.Follow" resultType="com.maven.dudu.entity.Follow">
+        select * from follow,user where follow.ruserid=#{ruserid} and follow.uid=user.userid
+    </select>
+
+    <!--  查询我的作品 -->
+    <select id="getMyRelease" resultMap="release" parameterType="String">
+        select * from releasemy,user where releasemy.ruserid=#{ruserid} and releasemy.ruserid=user.userid
+    </select>
+    
+    <!--  添加我的读书记录  -->
+    <insert id="addBookRecord" parameterType="com.maven.dudu.entity.Record">
+        insert into redrecord(userid,bookid,bookorder,bookatocic) value (#{userid},#{bookid},#{bookorder},#{bookatocic})
+    </insert>
+
+    <!--  获取读书记录  -->
+    <select id="getBookRecordById" parameterType="String" resultType="com.maven.dudu.entity.Record">
+        select * from redrecord where userid=#{userid}
+    </select>
+
+    <!--  修改我的读书记录  -->
+    <update id="updateBookRecord" parameterType="com.maven.dudu.entity.Record">
+        update redrecord set bookid=#{bookid},bookorder=#{bookorder},bookatocic=#{bookatocic} where userid=#{userid}
+    </update>
+    
+    <!--  加入书架  -->
+    <insert id="addBookShelves" parameterType="com.maven.dudu.entity.BookShelves">
+        insert into bookshelves(userid,bookid,title,cover,author,majorCate,minorCate,latelyFollower,longIntro)
+        value (#{userid},#{bookid},#{title},#{cover},#{author},#{majorCate},#{minorCate},#{latelyFollower},#{longIntro})
+    </insert>
+
+    <!--  查看书籍是否在书架  -->
+    <select id="isBookShelves" parameterType="com.maven.dudu.entity.BookShelves" resultType="int">
+        select count(*) from bookshelves where userid=#{userid} and bookid=#{bookid}
+    </select>
+
+    <!--  查看用户添加到书架的数量  -->
+    <select id="getBookShelvesCount" parameterType="com.maven.dudu.entity.BookShelves" resultType="int">
+        select count(*) from bookshelves where userid=#{userid}
+    </select>
+
+    <!--  查看用户书架  -->
+    <select id="getBookShelvesById" parameterType="String" resultType="com.maven.dudu.entity.BookShelves">
+        select * from bookshelves where userid=#{userid}
+    </select>
+
+    <!--  删除评论  -->
+    <delete id="delComment" parameterType="int">
+        delete from comment where commentid=#{commentid}
+    </delete>
+
+    <!--  更改评论数量  -->
+    <update id="reduceCommentNum" parameterType="int">
+        update releasemy set commentnum=commentnum-1 where releaseid=#{releaseid}
+    </update>
+
+    <!--  删除发布  -->
+    <delete id="delRelease" parameterType="int">
+        delete from releasemy where releaseid=#{releaseid}
+    </delete>
+
+    <!--  删除所有被删除的发布的所有评论  -->
+    <delete id="delCommentByRId" parameterType="int">
+        delete from comment where releaseid=#{releaseid}
+    </delete>
+
+    <!--  删除书籍  -->
+    <delete id="delBookShelves" parameterType="com.maven.dudu.entity.BookShelves">
+        delete from bookshelves where userid=#{userid} and bookid=#{bookid}
+    </delete>
 </mapper>
